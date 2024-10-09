@@ -1,10 +1,12 @@
 const express = require("express");
+const dotenv = require("dotenv");
 const app = express();
 const db = require("./db");
 const studentRoutes = require("./src/students/routes/students.routes");
 
 const port = 3000;
 
+dotenv.config();
 app.use(express.json());
 
 db.connect_db();

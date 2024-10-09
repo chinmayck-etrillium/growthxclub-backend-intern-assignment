@@ -64,6 +64,7 @@ const studentLogin = async (req, res) => {
   }
 };
 
+// Add assignment
 const addAssignment = async (req, res) => {
   const { task, admin } = req.body;
   let userId = req.user.user.userId;
@@ -82,7 +83,12 @@ const addAssignment = async (req, res) => {
       };
 
       const student = await StudentModel.Students.create(assignment);
-      return res.status(200).json(student);
+      const { _id } = student;
+      const assignment_upload = { taskId: _id, task };
+      const assignmentStatus = await StudentModel.AssignmentStatus.create(
+        assignment_upload
+      );
+      return res.status(200).json({ student, assignmentStatus });
     }
   } catch (error) {
     console.error(error);
@@ -90,8 +96,28 @@ const addAssignment = async (req, res) => {
   }
 };
 
+//Check assigment status
+const assignmentStatus = async (req, res) => {
+  const taskId = req.params["id"];
+  try {
+    let assignment = await StudentModel.AssignmentStatus.findOne({ taskId });
+
+    if (!assignment) {
+      return res
+        .status(404)
+        .json({ message: "Assignment with the current taskId not found!" });
+    }
+    assignment_status = assignment.status;
+    return res.status(200).json({ assignment_status });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal Server Error!" });
+  }
+};
+
 module.exports = {
   studentRegistration,
   studentLogin,
   addAssignment,
+  assignmentStatus,
 };
