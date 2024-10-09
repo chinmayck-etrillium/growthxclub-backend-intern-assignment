@@ -18,11 +18,16 @@ const StudentRegistrationSchema = mongoose.Schema(
   }
 );
 
+const StudentRegistration = mongoose.model(
+  "StudentRegistration",
+  StudentRegistrationSchema
+);
+
 const StudentSchema = mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "StudentRegistration",
       required: [true, "Enter the user Id"],
     },
     task: {
@@ -40,12 +45,30 @@ const StudentSchema = mongoose.Schema(
 );
 
 const Students = mongoose.model("Students", StudentSchema);
-const StudentRegistration = mongoose.model(
-  "StudentRegistration",
-  StudentRegistrationSchema
+
+const AssignmentStatusSchema = mongoose.Schema({
+  taskId: {
+    type: mongoose.Schema.Types.ObjectId, //_id of student schema
+    ref: "StudentSchema",
+    required: [true, "Enter the user Id"],
+  },
+  task: {
+    type: String,
+    required: [true, "Enter the task name"],
+  },
+  status: {
+    type: String,
+    default: "Pending",
+  },
+});
+
+const AssignmentStatus = mongoose.model(
+  "AssignmentStatus",
+  AssignmentStatusSchema
 );
 
 module.exports = {
   StudentRegistration,
   Students,
+  AssignmentStatus,
 };
