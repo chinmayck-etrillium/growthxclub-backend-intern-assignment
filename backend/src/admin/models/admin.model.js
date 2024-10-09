@@ -23,6 +23,7 @@ const AdminRegistration = mongoose.model(
   AdminRegistrationSchema
 );
 
+
 module.exports = {
   AdminRegistration,
 };

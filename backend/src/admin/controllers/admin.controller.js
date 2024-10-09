@@ -1,7 +1,9 @@
 const AdminModel = require("../models/admin.model");
+const StudentModel = require("../../students/models/students.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
+//Register new admin
 const registerAdmin = async (req, res) => {
   const { userId, password } = req.body;
   try {
@@ -13,7 +15,6 @@ const registerAdmin = async (req, res) => {
 
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
-    console.log(hashedPassword);
 
     admin = new AdminModel.AdminRegistration({
       userId,
@@ -28,6 +29,80 @@ const registerAdmin = async (req, res) => {
   }
 };
 
+//Admin login
+const loginAdmin = async (req, res) => {
+  const { userId, password } = req.body;
+  try {
+    let admin = await AdminModel.AdminRegistration.findOne({ userId });
+
+    if (!admin) {
+      return res.status(404).json({ message: "Admin with userId not found!" });
+    }
+
+    const isMatch = await bcrypt.compare(password, admin.password);
+
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials!" });
+    }
+
+    const payload = {
+      admin: {
+        id: admin.id,
+        userId: admin.userId,
+      },
+    };
+
+    const token = jwt.sign(payload, "Secret_Key", {
+      expiresIn: "1h",
+    });
+
+    return res.status(200).json({ token });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error!" });
+  }
+};
+
+//Get all the tagged assignments
+const getTaggedAssignments = async (req, res) => {
+  const admin = req.params.id;
+  try {
+    const assignment = await StudentModel.Students.find({ admin });
+    if (!assignment) {
+      return res.status(404).json({ message: "Assignment not found!" });
+    }
+    return res.status(200).json({ assignment });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error!" });
+  }
+};
+
+// Accept or Reject the assignments
+const acceptAssignment = async (req, res) => {
+  const assignmentId = req.params.id;
+  try {
+    let assignments = await StudentModel.AssignmentStatus.findOne({
+      taskId: assignmentId,
+    });
+
+    if (!assignments) {
+      return res
+        .status(404)
+        .json({ message: "Given assignment id doesnot exists" });
+    }
+    assignments.status = "Accepted";
+
+    await assignments.save();
+    return res.status(200).json({ message: "Assignment status updated!" });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error!" });
+  }
+};
+
 module.exports = {
   registerAdmin,
+  loginAdmin,
+  getTaggedAssignments,
+  acceptAssignment
 };

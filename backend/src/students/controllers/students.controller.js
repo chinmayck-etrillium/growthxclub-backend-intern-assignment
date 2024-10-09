@@ -1,4 +1,5 @@
 const StudentModel = require("../models/students.model");
+const AdminModel = require("../../admin/models/admin.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -69,11 +70,16 @@ const addAssignment = async (req, res) => {
   const { task, admin } = req.body;
   let userId = req.user.user.userId;
   let user = await StudentModel.StudentRegistration.findOne({ userId });
+  let isAdmin = await AdminModel.AdminRegistration.findOne({ userId: admin });
 
   if (!user) {
     return res.status(404).json({ message: "Not found!" });
   }
+  console.log(isAdmin);
 
+  if (!isAdmin) {
+    return res.status(404).json({ message: "Admin not found" });
+  }
   try {
     if (req.user) {
       const assignment = {
