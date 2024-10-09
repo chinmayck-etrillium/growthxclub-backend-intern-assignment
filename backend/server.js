@@ -2,7 +2,8 @@ const express = require("express");
 const dotenv = require("dotenv");
 const app = express();
 const db = require("./db");
-const studentRoutes = require("./src/students/routes/students.routes");
+const studentRoutes = require("./src/students/routes/students.route");
+const adminRoutes = require("./src/admin/routes/admin.route");
 
 const port = 3000;
 
@@ -16,6 +17,7 @@ app.listen(port, () => {
 });
 
 app.use("/students", studentRoutes);
+app.use("/admin", adminRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hi!");
