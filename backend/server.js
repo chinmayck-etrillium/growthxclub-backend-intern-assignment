@@ -2,7 +2,6 @@ const express = require("express");
 const dotenv = require("dotenv");
 const swaggerUI = require("swagger-ui-express");
 const swaggerJsDoc = require("swagger-jsdoc");
-const { version } = require("moment");
 const app = express();
 const db = require("./db");
 const studentRoutes = require("./src/students/routes/students.route");
