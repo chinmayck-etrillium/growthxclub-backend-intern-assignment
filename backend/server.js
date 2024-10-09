@@ -45,7 +45,11 @@ app.listen(port, () => {
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs));
 app.use("/students", studentRoutes);
 app.use("/admin", adminRoutes);
-
+app.use("/", (req, res) => {
+  res.send(`
+    <h3>Click Swagger UI to go to Api docs!</h3>
+    <a href="/api-docs">Swagger UI</a> `);
+});
 // app.get("/", (req, res) => {
 //   res.send("Hi!");
 // });
