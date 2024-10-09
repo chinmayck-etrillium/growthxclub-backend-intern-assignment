@@ -65,7 +65,7 @@ const loginAdmin = async (req, res) => {
 
 //Get all the tagged assignments
 const getTaggedAssignments = async (req, res) => {
-  const admin = req.params.id;
+  const admin = req.user.admin.userId;
   try {
     const assignment = await StudentModel.Students.find({ admin });
     if (!assignment) {
@@ -78,7 +78,7 @@ const getTaggedAssignments = async (req, res) => {
   }
 };
 
-// Accept or Reject the assignments
+// Accept assignments
 const acceptAssignment = async (req, res) => {
   const assignmentId = req.params.id;
   try {
@@ -100,9 +100,32 @@ const acceptAssignment = async (req, res) => {
   }
 };
 
+// Reject the assignments
+const rejectAssignment = async (req, res) => {
+  const assignmentId = req.params.id;
+  try {
+    let assignments = await StudentModel.AssignmentStatus.findOne({
+      taskId: assignmentId,
+    });
+
+    if (!assignments) {
+      return res
+        .status(404)
+        .json({ message: "Given assignment id doesnot exists" });
+    }
+    assignments.status = "Rejected";
+
+    await assignments.save();
+    return res.status(200).json({ message: "Assignment status updated!" });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error!" });
+  }
+};
+
 module.exports = {
   registerAdmin,
   loginAdmin,
   getTaggedAssignments,
-  acceptAssignment
+  acceptAssignment,
+  rejectAssignment,
 };

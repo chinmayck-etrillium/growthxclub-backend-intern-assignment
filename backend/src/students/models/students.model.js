@@ -26,7 +26,7 @@ const StudentRegistration = mongoose.model(
 const StudentSchema = mongoose.Schema(
   {
     userId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       ref: "StudentRegistration",
       required: [true, "Enter the user Id"],
     },

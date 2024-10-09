@@ -45,7 +45,7 @@ const studentLogin = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials!" });
+      return res.status(401).json({ message: "Invalid credentials!" });
     }
 
     const payload = {
@@ -78,12 +78,12 @@ const addAssignment = async (req, res) => {
   console.log(isAdmin);
 
   if (!isAdmin) {
-    return res.status(404).json({ message: "Admin not found" });
+    return res.status(404).json({ message: "Not found" });
   }
   try {
     if (req.user) {
       const assignment = {
-        userId: user._id,
+        userId: user.userId,
         task: task,
         admin: admin,
       };
@@ -94,7 +94,7 @@ const addAssignment = async (req, res) => {
       const assignmentStatus = await StudentModel.AssignmentStatus.create(
         assignment_upload
       );
-      return res.status(200).json({ student, assignmentStatus });
+      return res.status(201).json({ student, assignmentStatus });
     }
   } catch (error) {
     console.error(error);
@@ -102,11 +102,32 @@ const addAssignment = async (req, res) => {
   }
 };
 
+//Get assignments for respective students
+const getAssignments = async (req, res) => {
+  try {
+    const userId = req.user.user.userId;
+    let user = await StudentModel.Students.find({ userId });
+    if (!user) {
+      return res.status(404).json({ message: "Not Found!" });
+    }
+    return res.status(200).json(user);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error!" });
+  }
+};
+
 //Check assigment status
 const assignmentStatus = async (req, res) => {
   const taskId = req.params["id"];
   try {
+    const userId = req.user.user.userId;
+    let user = await StudentModel.Students.find({ userId });
     let assignment = await StudentModel.AssignmentStatus.findOne({ taskId });
+
+    if (!user) {
+      return res.status(404).json({ message: "Not Found!" });
+    }
 
     if (!assignment) {
       return res
@@ -125,5 +146,6 @@ module.exports = {
   studentRegistration,
   studentLogin,
   addAssignment,
+  getAssignments,
   assignmentStatus,
 };

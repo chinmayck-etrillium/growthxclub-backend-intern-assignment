@@ -5,7 +5,8 @@ const auth = require("../middleware/auth");
 
 router.post("/register", controller.registerAdmin);
 router.post("/login", controller.loginAdmin);
-router.get("/find/:id", controller.getTaggedAssignments);
-router.post("/accept/:id", controller.acceptAssignment);
+router.get("/find/", auth, controller.getTaggedAssignments);
+router.post("/accept/:id", auth, controller.acceptAssignment);
+router.post("/reject/:id", auth, controller.rejectAssignment);
 
 module.exports = router;
