@@ -1,10 +1,37 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const swaggerUI = require("swagger-ui-express");
+const swaggerJsDoc = require("swagger-jsdoc");
+const { version } = require("moment");
 const app = express();
 const db = require("./db");
-const studentRoutes = require("./src/students/routes/students.routes");
+const studentRoutes = require("./src/students/routes/students.route");
+const adminRoutes = require("./src/admin/routes/admin.route");
 
 const port = 3000;
+
+const options = {
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "GrowthX Assignment",
+      version: "1.0.0",
+      description: "Assignment submission portal",
+    },
+    servers: [
+      {
+        url: `http://localhost:${port}`,
+      },
+    ],
+  },
+  apis: [
+    "./src/admin/routes/admin.route.js",
+    "./src/students/routes/students.route.js",
+    "./src/swagger/admin.swagger.js",
+    "./src/swagger/students.swagger.js",
+  ],
+};
+const specs = swaggerJsDoc(options);
 
 dotenv.config();
 app.use(express.json());
@@ -15,8 +42,10 @@ app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
 
+app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs));
 app.use("/students", studentRoutes);
+app.use("/admin", adminRoutes);
 
-app.get("/", (req, res) => {
-  res.send("Hi!");
-});
+// app.get("/", (req, res) => {
+//   res.send("Hi!");
+// });

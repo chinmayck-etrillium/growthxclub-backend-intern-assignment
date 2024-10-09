@@ -1,4 +1,5 @@
 const StudentModel = require("../models/students.model");
+const AdminModel = require("../../admin/models/admin.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -22,7 +23,7 @@ const studentRegistration = async (req, res) => {
 
     await user.save();
 
-    res.status(400).json({ message: "New student registered successfully!" });
+    res.status(200).json({ message: "New student registered successfully!" });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal server error!" });
@@ -44,7 +45,7 @@ const studentLogin = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials!" });
+      return res.status(401).json({ message: "Invalid credentials!" });
     }
 
     const payload = {
@@ -69,15 +70,20 @@ const addAssignment = async (req, res) => {
   const { task, admin } = req.body;
   let userId = req.user.user.userId;
   let user = await StudentModel.StudentRegistration.findOne({ userId });
+  let isAdmin = await AdminModel.AdminRegistration.findOne({ userId: admin });
 
   if (!user) {
     return res.status(404).json({ message: "Not found!" });
   }
+  console.log(isAdmin);
 
+  if (!isAdmin) {
+    return res.status(404).json({ message: "Not found" });
+  }
   try {
     if (req.user) {
       const assignment = {
-        userId: user._id,
+        userId: user.userId,
         task: task,
         admin: admin,
       };
@@ -88,7 +94,7 @@ const addAssignment = async (req, res) => {
       const assignmentStatus = await StudentModel.AssignmentStatus.create(
         assignment_upload
       );
-      return res.status(200).json({ student, assignmentStatus });
+      return res.status(201).json({ student, assignmentStatus });
     }
   } catch (error) {
     console.error(error);
@@ -96,11 +102,32 @@ const addAssignment = async (req, res) => {
   }
 };
 
+//Get assignments for respective students
+const getAssignments = async (req, res) => {
+  try {
+    const userId = req.user.user.userId;
+    let user = await StudentModel.Students.find({ userId });
+    if (!user) {
+      return res.status(404).json({ message: "Not Found!" });
+    }
+    return res.status(200).json(user);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error!" });
+  }
+};
+
 //Check assigment status
 const assignmentStatus = async (req, res) => {
   const taskId = req.params["id"];
   try {
+    const userId = req.user.user.userId;
+    let user = await StudentModel.Students.find({ userId });
     let assignment = await StudentModel.AssignmentStatus.findOne({ taskId });
+
+    if (!user) {
+      return res.status(404).json({ message: "Not Found!" });
+    }
 
     if (!assignment) {
       return res
@@ -119,5 +146,6 @@ module.exports = {
   studentRegistration,
   studentLogin,
   addAssignment,
+  getAssignments,
   assignmentStatus,
 };
