@@ -13,6 +13,10 @@ const registerAdmin = async (req, res) => {
       return res.status(400).json({ message: "Admin with same userID exists" });
     }
 
+    if (password.length < 1) {
+      return res.status(400).json({ message: "The password length is weak!" });
+    }
+
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
 
